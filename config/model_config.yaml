@@ -1,0 +1,108 @@
+# ============================================================
+# Stock Forecasting Model Configuration
+# ============================================================
+
+data:
+  ticker: "AAPL"
+  period: "5y"
+  target_column: "Close"
+  train_split: 0.8
+  features:
+    - "Close"
+    - "Volume"
+    - "SMA_20"
+    - "RSI"
+    - "MACD"
+
+technical_indicators:
+  sma_windows: [20, 50, 200]
+  ema_windows: [12, 26]
+  rsi_period: 14
+  macd_fast: 12
+  macd_slow: 26
+  macd_signal: 9
+  bollinger_window: 20
+  bollinger_std: 2
+
+arima:
+  max_p: 5
+  max_d: 2
+  max_q: 5
+  seasonal: false
+  seasonal_period: 5  # trading days per week
+  information_criterion: "aic"  # aic or bic
+  trend: "c"  # c=constant, t=trend, ct=both
+  enforce_stationarity: true
+  enforce_invertibility: true
+
+prophet:
+  changepoint_prior_scale: 0.05
+  seasonality_prior_scale: 10.0
+  holidays_prior_scale: 10.0
+  seasonality_mode: "multiplicative"  # additive or multiplicative
+  yearly_seasonality: true
+  weekly_seasonality: true
+  daily_seasonality: false
+  changepoint_range: 0.8
+  n_changepoints: 25
+  cross_validation:
+    initial: "730 days"
+    period: "90 days"
+    horizon: "30 days"
+
+lstm:
+  sequence_length: 60
+  layers:
+    - type: "LSTM"
+      units: 128
+      return_sequences: true
+    - type: "Dropout"
+      rate: 0.2
+    - type: "LSTM"
+      units: 64
+      return_sequences: true
+    - type: "Dropout"
+      rate: 0.2
+    - type: "LSTM"
+      units: 32
+      return_sequences: false
+    - type: "Dropout"
+      rate: 0.2
+    - type: "Dense"
+      units: 16
+      activation: "relu"
+    - type: "Dense"
+      units: 1
+      activation: "linear"
+  optimizer: "adam"
+  learning_rate: 0.001
+  loss: "mse"
+  batch_size: 32
+  epochs: 100
+  early_stopping:
+    monitor: "val_loss"
+    patience: 10
+    restore_best_weights: true
+  reduce_lr:
+    monitor: "val_loss"
+    factor: 0.5
+    patience: 5
+    min_lr: 0.00001
+
+evaluation:
+  metrics:
+    - "rmse"
+    - "mae"
+    - "mape"
+    - "r2"
+  figure_dpi: 150
+  figure_format: "png"
+  save_dir: "reports/figures"
+
+paths:
+  data_dir: "data"
+  model_dir: "models"
+  report_dir: "reports"
+  figure_dir: "reports/figures"
+
+random_seed: 42
